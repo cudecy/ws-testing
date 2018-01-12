@@ -1,0 +1,125 @@
+#============================================================
+# IMPORTANT: Auto Generated Header. DO NOT CHANGE MANUALLY.
+# Product: Finacle Core
+# Category: User Defined
+# Script: activeAccountInquiry.scr
+# Type: NA|default
+# Description: To determine active and inactive accounts
+# Author: David Udechukwu
+# Date: 10/01/18 2:39 PM
+# Modification Log:
+#============================================================
+<--START
+TRACE ON
+	sv_a = urhk_Acct_PrintRepos("BANCS")
+
+	IF (repesxists("ACCT") == 0) then
+	#{
+	   createrep("ACCT")
+	#}
+	ENDIF
+
+	IF (classexists("ACCT", "INQ") == 0) then
+	#{
+		createclass("ACCT", "INQ", 5)
+	#}
+	ENDIF
+
+	ACCT.INQ.acctNum = BANCS.INPUT.foracid
+	ACCT.INQ.resMssg = " "
+	ACCT.INQ.MSG = ""
+
+	#----------------------------------------------------------------------------------
+	#	FETCHING CLEAR BAL AMOUNT
+	#----------------------------------------------------------------------------------
+
+	sv_a = "clearBalance|SELECT clr_bal_amt from tbaadm.gam where acct_ownership != 'O' and foracid = '"+ACCT.INQ.acctNum+"' "
+	print(sv_a)
+
+	sv_a = urhk_dbSelectWithBind(sv_a)
+
+	ACCT.INQ.clearBal = BANCS.OUTPARAM.clearBalance
+
+	PRINT(ACCT.INQ.clearBal)
+
+	sv_d = ACCT.INQ.clearBal
+
+	IF (sv_d < 5000)
+	#{
+	   ACCT.INQ.activeCust = N
+	ELSE
+	   ACCT.INQ.activeCust = Y
+	#}
+
+
+	ERRORCATCH:
+	SOL.XFER.ERRORMSG = ""
+	SOL.XFER.EXEPTNMSG = ""
+	SOL.XFER.WARNINGMSG = ""
+
+	sv_c = BANCS.OUTPUT.successOrFailure
+	PRINT(sv_c)
+	PRINT(BANCS.OUTPARAM.Fatal_num)
+	PRINT(BANCS.OUTPARAM.Error_num)
+	PRINT(BANCS.OUTPARAM.Warning_num)
+	PRINT(BANCS.OUTPARAM.UserInfo_num)
+	PRINT(BANCS.OUTPARAM.Xcpn_num)
+	PRINT(BANCS.OUTPARAM.Xcpn_Err_num)
+	PRINT(BANCS.OUTPARAM.Xcpn_Xcpn_num)
+	PRINT(BANCS.OUTPARAM.Xcpn_Err_num)
+
+	sv_d = 1
+	sv_c = CINT(BANCS.OUTPARAM.Error_num)
+	sv_g = " "
+	WHILE (sv_d <= sv_c)
+	#{
+		sv_f = FORMAT$(sv_d,"%d")
+		ACCT.INQ.MSG = ("BANCS").("OUTPARAM").("ErrorMesg_"+sv_f)
+		PRINT(ACCT.INQ.MSG)
+
+		sv_e = ("BANCS").("OUTPARAM").("ErrorCode_"+sv_f)
+		PRINT(sv_e)
+		sv_e = ("BANCS").("OUTPARAM").("Tag_"+sv_f)
+		PRINT(sv_e)
+		sv_d = sv_d + 1
+		ACCT.INQ.resMssg = ACCT.INQ.MSG
+                GOTO ESCAPE
+	#}
+	DO
+
+	sv_d = 1
+	sv_c = CINT(BANCS.OUTPARAM.Xcpn_num)
+
+	WHILE (sv_d <= sv_c)
+	#{
+		sv_f = FORMAT$(sv_d,"%d")
+		ACCT.INQ.MSG = ("BANCS").("OUTPARAM").("XcpnDesc_"+sv_f)
+		PRINT(ACCT.INQ.MSG)
+		sv_d = sv_d + 1
+		ACCT.INQ.resMssg = ACCT.INQ.MSG
+                GOTO ESCAPE
+	#}
+	DO
+	sv_d = 1
+	sv_c = CINT(BANCS.OUTPARAM.Warning_num)
+
+	WHILE (sv_d <= sv_c)
+	#{
+		sv_f = FORMAT$(sv_d,"%d")
+		ACCT.INQ.MSG = ("BANCS").("OUTPARAM").("WarningMesg"+sv_f)
+		PRINT(ACCT.INQ.MSG)
+		sv_d = sv_d + 1
+		sv_d = sv_d + 1
+		ACCT.INQ.resMssg = ACCT.INQ.MSG
+                GOTO ESCAPE
+	#}
+	DO
+
+	ESCAPE:
+
+	sv_u = urhk_SetOrbOut("SuccessOrFailure|Y")
+	sv_u = urhk_SetOrbOut("activeCustomer|"+ ACCT.INQ.resMssg + "_" + ACCT.INQ.activeCust)
+	exitscript
+
+TRACE OFF
+END-->

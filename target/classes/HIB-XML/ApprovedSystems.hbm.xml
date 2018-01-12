@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="com.longbridgetech.Kastle.domain.ApprovedSystems" schema="CUSTOM" table="KAS_APPROVED_SYSTEMS_TBL">
+        <id name="seqNum" column="SEQ_NUM" type="long">
+            <generator class="sequence">
+                <param name="sequence">KAS_APPROVED_SYSTEMS_SEQ</param>
+            </generator>
+            <!--<generator class="increment" />-->
+        </id>
+        <property name="ipAddress" type="string"><column length="20" name="IP_ADDRESS"/></property>
+        <property name="systemDesc" type="string"><column length="5" name="SYSTEM_DESC"/></property>
+        <property name="approvedDate" type="date"><column length="8" name="APPROVED_DATE"/></property>
+    </class>
+
+
+</hibernate-mapping>

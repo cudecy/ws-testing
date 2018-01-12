@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="BalInqResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="BalInqRs">
+          <xs:complexType>
+            <xs:choice maxOccurs="unbounded" minOccurs="0">
+              <xs:element name="AcctId">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element type="xs:string" name="AcctId"/>
+                    <xs:element name="AcctType">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element type="xs:string" name="SchmCode"/>
+                          <xs:element type="xs:string" name="SchmType"/>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element type="xs:string" name="AcctCurr"/>
+                    <xs:element name="BankInfo">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element type="xs:string" name="BankId"/>
+                          <xs:element type="xs:string" name="Name"/>
+                          <xs:element type="xs:string" name="BranchId"/>
+                          <xs:element type="xs:string" name="BranchName"/>
+                          <xs:element name="PostAddr">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element type="xs:string" name="Addr1"/>
+                                <xs:element type="xs:string" name="Addr2"/>
+                                <xs:element type="xs:string" name="Addr3"/>
+                                <xs:element type="xs:string" name="City"/>
+                                <xs:element type="xs:string" name="StateProv"/>
+                                <xs:element type="xs:string" name="PostalCode"/>
+                                <xs:element type="xs:string" name="Country"/>
+                                <xs:element type="xs:string" name="AddrType"/>
+                              </xs:sequence>
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="AcctBal">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="BalType">
+                      <xs:simpleType>
+                        <xs:restriction base="xs:string">
+                          <xs:enumeration value="CLRBAL"/>
+                          <xs:enumeration value="SANLIM"/>
+                        </xs:restriction>
+                      </xs:simpleType>
+                    </xs:element>
+                    <xs:element name="BalAmt">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="amountValue">
+                            <xs:simpleType>
+                              <xs:restriction base="xs:string">
+                                <xs:enumeration value="407.85"/>
+                                <xs:enumeration value="0.00"/>
+                              </xs:restriction>
+                            </xs:simpleType>
+                          </xs:element>
+                          <xs:element type="xs:string" name="currencyCode"/>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:choice>
+          </xs:complexType>
+        </xs:element>
+        <xs:element type="xs:string" name="BalInq_CustomData"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="com.longbridgetech.Kastle.Entities.LienUpdAudit" schema="CUSTOM" table="KAS_LIEN_UPDATE_AUDIT_TBL">
+        <id name="sessionID" column="SESSION_ID" type="string">
+            <!--<generator class="sequence">-->
+                <!--<param name="sequence">KAS_LIEN_UPD_AUDIT_SEQ</param>-->
+            <!--</generator>-->
+        </id>
+        <property name="RequestID" not-null="true" column="REQUEST_ID"  type="string" length="50" />
+        <property name="appCode" not-null="false" column="APP_CODE"  type="string"  />
+        <property name="acctInfo" not-null="false" column="ACCT_INFO"  type="string"  />
+        <property name="acctInfoResp" not-null="false" column="ACCT_INFO_RESP"  type="string"  />
+        <property name="freshLienAmt" not-null="false" column="FRLN_AMT"  type="string"  />
+        <property name="freshLienExpDate" not-null="false" column="FRLN_EXP_DATE"  type="string" />
+        <property name="freshLienRCode" not-null="false" column="FRLN_RCODE"  type="string"  />
+        <property name="freshLienRemark" not-null="false" column="FRLN_REMARK"  type="string" />
+        <property name="loanAcctNum" not-null="false" column="LOAN_ACCT_NUM"  type="string"  />
+        <property name="loanTransAmt" not-null="false" column="LOAN_TRN_AMT"  type="string"  />
+        <property name="loanTransAmtCurr" not-null="false" column="LOAN_TRN_AMT_CURR"  type="string"  />
+        <property name="opAcctNum" not-null="false" column="LAON_OP_ACCT_NUM"  type="string" />
+        <property name="modifyUnlienAmt" not-null="false" column="MDLN_UNLIEN_AMT"  type="string" />
+        <property name="modifyLienId" not-null="false" column="MDLN_LIENID"  type="string" />
+        <property name="responseCode" not-null="false" column="RESPONSE_CODE"  type="string"  />
+        <property name="errorMessage" not-null="false" column="ERROR_MESSAGE"  type="string"  />
+        <property name="ResponseMessage" not-null="false" column="RESP_MESSAGE"  type="string"  />
+        <property name="requestDate" not-null="true" column="REQUEST_DATE"  type="timestamp" />
+        <property name="responseDate" not-null="false" column="RESPONSE_DATE"  type="timestamp" />
+        <property name="status" not-null="true" column="STATUS"  type="string" />
+    </class>
+
+
+</hibernate-mapping>
