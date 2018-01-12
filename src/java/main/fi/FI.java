@@ -1,7 +1,7 @@
 package main.fi;
 
 import main.AcctInqResponse;
-import main.AcctinqResp.Body;
+import main.AcctinqResp.BalInqResponse;
 import main.request.ActiveAccountRequest;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -104,13 +104,15 @@ public class FI {
 
     public AcctInqResponse fiAccountInquiry(ActiveAccountRequest activeAccountRequest){
         this.logger.info("**************************************** BEGIN PAYMENT PROCESS ****************************************");
+        System.out.println("**************************************** BEGIN PAYMENT PROCESS ****************************************");
         AcctInqResponse response = new AcctInqResponse();
-        Body respBody = new Body();
-        Body.BalInqResponse balInqResponse= new Body.BalInqResponse();
+        BalInqResponse respBody = new BalInqResponse();
+        BalInqResponse balInqResponse = new BalInqResponse();
         StringWriter writer = new StringWriter();
         Date startDate = new Date();
         FIResponse fiResponse = new FIResponse();
         String requestId = "Req_" + RandomStringUtils.randomNumeric(13);
+        System.out.println("Request UIID is: "+requestId);
         this.context.put("RequestUUID", requestId);
         this.context.put("MessageDateTime", (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date())));
         this.t = this.ve.getTemplate("/FI_XML/acctInqProd.vm");
@@ -130,18 +132,23 @@ public class FI {
             InputStream inputStream = new ByteArrayInputStream(getBytes(responseMessage));
             JAXBContext jaxbContext = null;
             try {
-                jaxbContext = JAXBContext.newInstance(Body.BalInqResponse.class);
+                System.out.println("Gotten to context and trying to perform operation now");
+                jaxbContext = JAXBContext.newInstance(BalInqResponse.class);
                 Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-                balInqResponse = (Body.BalInqResponse) jaxbUnmarshaller.unmarshal(inputStream);
-                respBody.setBalInqResponse(balInqResponse);
+                balInqResponse = (BalInqResponse) jaxbUnmarshaller.unmarshal(inputStream);
+                System.out.println("Successfully un-masrshalled");
+                respBody.setBalInqRs(balInqResponse.getBalInqRs());
+                System.out.println("Response body is: "+respBody);
                 response.setAcctinqRespProd(respBody);
                 response.setRespcode("00");
+                System.out.println("Successfully set response");
             } catch (JAXBException e) {
                 e.printStackTrace();
             }
 
             fiResponse.setIsSuccessful(true);
             this.logger.info("**************************************** success ****************************************");
+            System.out.println("**************************************** success ****************************************");
         } else {
             String errorCode = StringUtils.substringBetween(responseMessage, "<ErrorCode>", "</ErrorCode>");
             String errorDesc = StringUtils.substringBetween(responseMessage, "<ErrorDesc>", "</ErrorDesc>");
@@ -149,17 +156,20 @@ public class FI {
             String errorType = StringUtils.substringBetween(responseMessage, "<ErrorType>", "</ErrorType>");
             String errorMessage = StringUtils.replaceEach("RequestUUID: " + requestId + " | ErrorCode: " + errorCode + " | ErrorDesc: " + errorDesc + " | ErrorSource: " + errorSource + " | ErrorType: " + errorType, new String[]{"\n", "\t", "\r"}, new String[]{" ", " ", " "});
             this.logger.error("****** FI encountered error. Error Description {} *****", errorMessage);
+            System.out.println("****** FI encountered error. Error Description {} *****"+ errorMessage);
             response.setRespcode("96");
             response.setErrorMessage(errorMessage);
         }
         this.logger.info("**************************************** PAYMENT PROCESS  ENDED****************************************");
+        System.out.println("**************************************** PAYMENT PROCESS  ENDED****************************************");
+        System.out.println("At the end, response is: "+response);
         return response;
     }
 
 
     public String activeAccountFIResp(String foracid){
         this.logger.info("**************************************** BEGIN PAYMENT PROCESS ****************************************");
-        Body response = new Body();
+        BalInqResponse response = new BalInqResponse();
         StringWriter writer = new StringWriter();
         Date startDate = new Date();
         String respSring=null;
@@ -167,19 +177,18 @@ public class FI {
         String requestId = "Req_" + RandomStringUtils.randomNumeric(13);
         this.context.put("RequestUUID", requestId);
         this.context.put("MessageDateTime", (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date())));
-        this.t = this.ve.getTemplate("../resources/FI_XML/accountInquiry.vm");
+        this.t = this.ve.getTemplate("/FI_XML/accountInquiry.vm");
 
         this.context.put("foracid", foracid);
 
         this.t.merge(this.context, writer);
         String payload11 = writer.toString();
-        String responseMessage = "";//this.callService(payload11);
+        String responseMessage = this.callService(payload11);
         String charSequence1 = "<Status>SUCCESS</Status>";
-        boolean isSuccessful = true;//responseMessage.contains(charSequence1);
+        boolean isSuccessful = responseMessage.contains(charSequence1);
 
         if (isSuccessful) {
-//            String resultMssg = StringUtils.substringBetween(responseMessage, "<activeCustomer>", "</activeCustomer>");
-            String resultMssg = "Y";//StringUtils.substringBetween(responseMessage, "<activeCustomer>", "</activeCustomer>");
+            String resultMssg = StringUtils.substringBetween(responseMessage, "<activeCustomer>", "</activeCustomer>");
             respSring = resultMssg;
             this.logger.info("**************************************** success ****************************************");
         } else {

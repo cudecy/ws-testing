@@ -1,6 +1,6 @@
 package main;
 
-import main.AcctinqResp.Body;
+import main.AcctinqResp.BalInqResponse;
 
 /**
  * Created by Longbridge PC on 1/10/2018.
@@ -9,7 +9,7 @@ public class AcctInqResponse {
     private String responseMessage;
     private String respcode;
     private String activeCustomer;
-    private Body acctinqRespProd;
+    private BalInqResponse acctinqRespProd;
     private String errorMessage;
 
     public String getErrorMessage() {
@@ -44,11 +44,11 @@ public class AcctInqResponse {
         this.activeCustomer = activeCustomer;
     }
 
-    public Body getAcctinqRespProd() {
+    public BalInqResponse getAcctinqRespProd() {
         return acctinqRespProd;
     }
 
-    public void setAcctinqRespProd(Body acctinqRespProd) {
+    public void setAcctinqRespProd(BalInqResponse acctinqRespProd) {
         this.acctinqRespProd = acctinqRespProd;
     }
 

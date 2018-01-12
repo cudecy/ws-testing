@@ -1,4 +1,3 @@
-<Body>
     <BalInqResponse>
         <BalInqRs>
             <AcctId>
@@ -229,4 +228,4 @@
                 </BalAmt>
             </AcctBal>
         </BalInqRs><BalInq_CustomData/>
-    </BalInqResponse></Body>
+    </BalInqResponse>

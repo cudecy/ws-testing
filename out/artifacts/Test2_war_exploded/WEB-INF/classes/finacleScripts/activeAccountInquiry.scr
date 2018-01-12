@@ -11,9 +11,9 @@
 #============================================================
 <--START
 TRACE ON
-	sv_a = urhk_Acct_PrintRepos("BANCS")
+	sv_a = urhk_B2k_PrintRepos("BANCS")
 
-	IF (repesxists("ACCT") == 0) then
+	IF (repexists("ACCT") == 0) then
 	#{
 	   createrep("ACCT")
 	#}
@@ -44,13 +44,26 @@ TRACE ON
 
 	sv_d = ACCT.INQ.clearBal
 
-	IF (sv_d < 5000)
-	#{
-	   ACCT.INQ.activeCust = N
-	ELSE
-	   ACCT.INQ.activeCust = Y
-	#}
+    if(sv_d == 0) THEN
+    #{
+       ACCT.INQ.message = "N"
+       ACCT.INQ.activeCust = "An error occurred"
+       GOTO FINAL
+    #}
+    ENDIF
 
+
+	IF (sv_d < 5000)THEN
+	#{
+	   ACCT.INQ.activeCust = "N"
+	   ACCT.INQ.message = "Y"
+	   GOTO FINAL
+	ELSE
+	   ACCT.INQ.activeCust = "Y"
+	   ACCT.INQ.message = "Y"
+	   GOTO FINAL
+	#}
+	ENDIF
 
 	ERRORCATCH:
 	SOL.XFER.ERRORMSG = ""
@@ -116,9 +129,16 @@ TRACE ON
 	DO
 
 	ESCAPE:
+	sv_u = urhk_SetOrbOut("SuccessOrFailure|N")
+	sv_u = urhk_SetOrbOut("Err|"+ ACCT.INQ.resMssg)
+	exitscript
 
-	sv_u = urhk_SetOrbOut("SuccessOrFailure|Y")
-	sv_u = urhk_SetOrbOut("activeCustomer|"+ ACCT.INQ.resMssg + "_" + ACCT.INQ.activeCust)
+
+
+	FINAL:
+
+	sv_u = urhk_SetOrbOut("SuccessOrFailure|"+ACCT.INQ.message)
+	sv_u = urhk_SetOrbOut("activeCustomer|"+ACCT.INQ.activeCust)
 	exitscript
 
 TRACE OFF
