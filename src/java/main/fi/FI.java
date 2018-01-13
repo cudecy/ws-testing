@@ -1,8 +1,11 @@
 package main.fi;
 
+import main.AcctBalsByCIFResp.CustBalResponse;
 import main.AcctInqResponse;
 import main.AcctinqResp.BalInqResponse;
 import main.request.ActiveAccountRequest;
+import main.request.CustomerBalancesRequest;
+import main.CustomerBalancesInquiryResponse;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -102,6 +105,84 @@ public class FI {
     }
 
 
+    public CustomerBalancesInquiryResponse fiCustomerBalancesInquiry(CustomerBalancesRequest customerBalancesRequest){
+        this.logger.info("**************************************** BEGIN PAYMENT PROCESS ****************************************");
+        System.out.println("**************************************** BEGIN PAYMENT PROCESS ****************************************");
+        CustomerBalancesInquiryResponse response = new CustomerBalancesInquiryResponse();
+        CustBalResponse respBody = new CustBalResponse();
+        CustBalResponse.Accountbalance respAcctBal = new CustBalResponse.Accountbalance();
+        CustBalResponse custBalInqResponse = new CustBalResponse();
+        StringWriter writer = new StringWriter();
+//        Date startDate = new Date();
+        FIResponse fiResponse = new FIResponse();
+        String requestId = "Req_" + RandomStringUtils.randomNumeric(13);
+        System.out.println("Request UIID is: "+requestId);
+        this.context.put("RequestUUID", requestId);
+        this.context.put("MessageDateTime", (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date())));
+        this.t = this.ve.getTemplate("/FI_XML/custAcctBal.vm");
+
+        this.context.put("cifId", customerBalancesRequest.getCust_id());
+
+        this.t.merge(this.context, writer);
+        String payload11 = writer.toString();
+        System.out.println("request is: "+payload11);
+        String responseMessage = this.callService(payload11);
+        String charSequence1 = "<Status>SUCCESS</Status>";
+        boolean isSuccessful = responseMessage.contains(charSequence1);
+
+        if (isSuccessful) {
+            responseMessage = StringUtils.substringBetween(responseMessage, "<Body>", "</Body>");
+            System.out.println("response is: "+responseMessage);
+            InputStream inputStream = new ByteArrayInputStream(getBytes(responseMessage));
+            JAXBContext jaxbContext = null;
+            try {
+                System.out.println("Gotten to context and trying to perform operation now");
+                jaxbContext = JAXBContext.newInstance(CustBalResponse.class);
+                Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+                custBalInqResponse = (CustBalResponse) jaxbUnmarshaller.unmarshal(inputStream);
+                System.out.println("Successfully un-masrshalled");
+                List<CustBalResponse.Accountbalance> allAccountBalances = respBody.getAccountbalance();
+                if(allAccountBalances.size() > 0){
+                    if(allAccountBalances.size() == 1){
+                        respAcctBal.setBalance(allAccountBalances.get(0).toString());
+                    }else{
+                        for(CustBalResponse.Accountbalance a : allAccountBalances){
+                            respAcctBal.setBalance(a.toString());
+                        }
+                    }
+                }else{
+                    System.out.println("An error has occurred. Maybe no balance was fetched...");
+                }
+//                respBody.setAccountbalance(custBalInqResponse.getAccountbalance());
+                System.out.println("Response body is: "+respBody);
+                response.setCustomerBalancesInquiryResponse(respBody);
+                response.setRespcode("00");
+                System.out.println("Successfully set response");
+            } catch (JAXBException e) {
+                e.printStackTrace();
+            }
+
+            fiResponse.setIsSuccessful(true);
+            this.logger.info("**************************************** success ****************************************");
+            System.out.println("**************************************** success ****************************************");
+        } else {
+            String errorCode = StringUtils.substringBetween(responseMessage, "<ErrorCode>", "</ErrorCode>");
+            String errorDesc = StringUtils.substringBetween(responseMessage, "<ErrorDesc>", "</ErrorDesc>");
+            String errorSource = StringUtils.substringBetween(responseMessage, "<ErrorSource>", "</ErrorSource>");
+            String errorType = StringUtils.substringBetween(responseMessage, "<ErrorType>", "</ErrorType>");
+            String errorMessage = StringUtils.replaceEach("RequestUUID: " + requestId + " | ErrorCode: " + errorCode + " | ErrorDesc: " + errorDesc + " | ErrorSource: " + errorSource + " | ErrorType: " + errorType, new String[]{"\n", "\t", "\r"}, new String[]{" ", " ", " "});
+            this.logger.error("****** FI encountered error. Error Description {} *****", errorMessage);
+            System.out.println("****** FI encountered error. Error Description {} *****"+ errorMessage);
+            response.setRespcode("96");
+            response.setErrorMessage(errorMessage);
+        }
+        this.logger.info("**************************************** PAYMENT PROCESS  ENDED****************************************");
+        System.out.println("**************************************** PAYMENT PROCESS  ENDED****************************************");
+        System.out.println("At the end, response is: "+response);
+        return response;
+    }
+
+
     public AcctInqResponse fiAccountInquiry(ActiveAccountRequest activeAccountRequest){
         this.logger.info("**************************************** BEGIN PAYMENT PROCESS ****************************************");
         System.out.println("**************************************** BEGIN PAYMENT PROCESS ****************************************");
@@ -166,6 +247,43 @@ public class FI {
         return response;
     }
 
+
+    public String customerBalancesFIResp(String custId){
+        this.logger.info("**************************************** BEGIN PAYMENT PROCESS ****************************************");
+        BalInqResponse response = new BalInqResponse();
+        StringWriter writer = new StringWriter();
+        Date startDate = new Date();
+        String respSring=null;
+        FIResponse fiResponse = new FIResponse();
+        String requestId = "Req_" + RandomStringUtils.randomNumeric(13);
+        this.context.put("RequestUUID", requestId);
+        this.context.put("MessageDateTime", (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date())));
+        this.t = this.ve.getTemplate("/FI_XML/accountInquiry.vm");
+
+        this.context.put("custId", custId);
+
+        this.t.merge(this.context, writer);
+        String payload11 = writer.toString();
+        String responseMessage = this.callService(payload11);
+        String charSequence1 = "<Status>SUCCESS</Status>";
+        boolean isSuccessful = responseMessage.contains(charSequence1);
+
+        if (isSuccessful) {
+            String resultMssg = StringUtils.substringBetween(responseMessage, "<activeCustomer>", "</activeCustomer>");
+            respSring = resultMssg;
+            this.logger.info("**************************************** success ****************************************");
+        } else {
+            String errorCode = StringUtils.substringBetween(responseMessage, "<ErrorCode>", "</ErrorCode>");
+            String errorDesc = StringUtils.substringBetween(responseMessage, "<ErrorDesc>", "</ErrorDesc>");
+            String errorSource = StringUtils.substringBetween(responseMessage, "<ErrorSource>", "</ErrorSource>");
+            String errorType = StringUtils.substringBetween(responseMessage, "<ErrorType>", "</ErrorType>");
+            String errorMessage = StringUtils.replaceEach("RequestUUID: " + requestId + " | ErrorCode: " + errorCode + " | ErrorDesc: " + errorDesc + " | ErrorSource: " + errorSource + " | ErrorType: " + errorType, new String[]{"\n", "\t", "\r"}, new String[]{" ", " ", " "});
+            this.logger.error("****** FI encountered    error. Error Description {} *****", errorMessage);
+            respSring = errorMessage;
+        }
+        this.logger.info("**************************************** PAYMENT PROCESS  ENDED****************************************");
+        return respSring;
+    }
 
     public String activeAccountFIResp(String foracid){
         this.logger.info("**************************************** BEGIN PAYMENT PROCESS ****************************************");

@@ -138,7 +138,7 @@ TRACE ON
 	FINAL:
 
 	sv_u = urhk_SetOrbOut("SuccessOrFailure|"+ACCT.INQ.message)
-	sv_u = urhk_SetOrbOut("activeCustomer|"+ACCT.INQ.activeCust)
+	sv_u = urhk_SetOrbOut("customerBalances|"+ACCT.INQ.activeCust)
 	exitscript
 
 TRACE OFF
