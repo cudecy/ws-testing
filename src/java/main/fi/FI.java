@@ -119,20 +119,21 @@ public class FI {
         System.out.println("Request UIID is: "+requestId);
         this.context.put("RequestUUID", requestId);
         this.context.put("MessageDateTime", (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date())));
-        this.t = this.ve.getTemplate("/FI_XML/custAcctBal.vm");
-
         this.context.put("cifId", customerBalancesRequest.getCust_id());
+//        this.t = this.ve.getTemplate("/FI_XML/custAcctBal.vm");
+        this.t = this.ve.getTemplate("/FI_XML/customCustAcctBal.vm");
 
         this.t.merge(this.context, writer);
         String payload11 = writer.toString();
         System.out.println("request is: "+payload11);
         String responseMessage = this.callService(payload11);
+        System.out.println("Response from FI is: "+responseMessage);
         String charSequence1 = "<Status>SUCCESS</Status>";
         boolean isSuccessful = responseMessage.contains(charSequence1);
 
         if (isSuccessful) {
             responseMessage = StringUtils.substringBetween(responseMessage, "<Body>", "</Body>");
-            System.out.println("response is: "+responseMessage);
+            System.out.println("sub-stringed body is: "+responseMessage);
             InputStream inputStream = new ByteArrayInputStream(getBytes(responseMessage));
             JAXBContext jaxbContext = null;
             try {
@@ -141,7 +142,7 @@ public class FI {
                 Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
                 custBalInqResponse = (CustBalResponse) jaxbUnmarshaller.unmarshal(inputStream);
                 System.out.println("Successfully un-masrshalled");
-                List<CustBalResponse.Accountbalance> allAccountBalances = respBody.getAccountbalance();
+                List<CustBalResponse.Accountbalance> allAccountBalances = custBalInqResponse.getAccountbalance();
                 if(allAccountBalances.size() > 0){
                     if(allAccountBalances.size() == 1){
                         respAcctBal.setBalance(allAccountBalances.get(0).toString());
@@ -154,8 +155,8 @@ public class FI {
                     System.out.println("An error has occurred. Maybe no balance was fetched...");
                 }
 //                respBody.setAccountbalance(custBalInqResponse.getAccountbalance());
-                System.out.println("Response body is: "+respBody);
-                response.setCustomerBalancesInquiryResponse(respBody);
+                System.out.println("Response body is: "+custBalInqResponse);
+                response.setCustomerBalancesInquiryResponse(custBalInqResponse);
                 response.setRespcode("00");
                 System.out.println("Successfully set response");
             } catch (JAXBException e) {
@@ -258,9 +259,8 @@ public class FI {
         String requestId = "Req_" + RandomStringUtils.randomNumeric(13);
         this.context.put("RequestUUID", requestId);
         this.context.put("MessageDateTime", (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date())));
-        this.t = this.ve.getTemplate("/FI_XML/accountInquiry.vm");
-
-        this.context.put("custId", custId);
+        this.context.put("cifId", custId);
+        this.t = this.ve.getTemplate("/FI_XML/customCustAcctBal.vm");
 
         this.t.merge(this.context, writer);
         String payload11 = writer.toString();
@@ -269,9 +269,10 @@ public class FI {
         boolean isSuccessful = responseMessage.contains(charSequence1);
 
         if (isSuccessful) {
-            String resultMssg = StringUtils.substringBetween(responseMessage, "<activeCustomer>", "</activeCustomer>");
-            respSring = resultMssg;
+//            String resultMssg = StringUtils.substringBetween(responseMessage, "<activeCustomer>", "</activeCustomer>");
+            respSring = "";
             this.logger.info("**************************************** success ****************************************");
+            System.out.println("**************************************** success ****************************************");
         } else {
             String errorCode = StringUtils.substringBetween(responseMessage, "<ErrorCode>", "</ErrorCode>");
             String errorDesc = StringUtils.substringBetween(responseMessage, "<ErrorDesc>", "</ErrorDesc>");

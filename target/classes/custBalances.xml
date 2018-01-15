@@ -1,0 +1,20 @@
+<custBalResponse>
+    <errorMessage></errorMessage>
+    <requestID>14151</requestID>
+    <responseCode>00</responseCode>
+    <accountbalance>
+        <accountNumber>124141</accountNumber>
+        <currency>NGN</currency>
+        <balance>42424.22</balance>
+    </accountbalance>
+    <accountbalance>
+        <accountNumber>124141</accountNumber>
+        <currency>NGN</currency>
+        <balance>42424.22</balance>
+    </accountbalance>
+    <accountbalance>
+        <accountNumber>124141</accountNumber>
+        <currency>NGN</currency>
+        <balance>42424.22</balance>
+    </accountbalance>
+</custBalResponse>

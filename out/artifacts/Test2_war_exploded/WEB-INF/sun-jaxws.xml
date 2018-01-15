@@ -10,4 +10,8 @@
             name='ActiveAccount'
             implementation='main.webService.ActiveAccount'
             url-pattern='/accountInquiry'/>
+    <endpoint
+            name='CustomerBalances'
+            implementation='main.webService.CustomerBalances'
+            url-pattern='/services/CustomerBalances'/>
 </endpoints>

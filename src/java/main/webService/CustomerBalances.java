@@ -23,17 +23,17 @@ public class CustomerBalances {
     )CustomerBalancesRequest customerBalancesRequest){
         this.logger.info("Customer balances request details - {}", customerBalancesRequest.toString());
         CustomerBalancesInquiryResponse customerBalanceResponse = null;
-        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-        Validator validator = factory.getValidator();
-        Set constraintViolations = validator.validate(customerBalancesRequest);
-
-        String status = "FAILED";
+//        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+//        Validator validator = factory.getValidator();
+//        Set constraintViolations = validator.validate(customerBalancesRequest);
+//
+//        String status = "FAILED";
 
         customerBalanceResponse = new FI().fiCustomerBalancesInquiry(customerBalancesRequest);
         if(customerBalanceResponse.getRespcode().equals("00")){
-            status = "SUCCESS";
-            String accountBalances = new FI().customerBalancesFIResp(customerBalancesRequest.getCust_id());
-            customerBalanceResponse.setCustomerBalances(accountBalances);
+//            status = "SUCCESS";
+//            String accountBalances = new FI().customerBalancesFIResp(customerBalancesRequest.getCust_id());
+//            customerBalanceResponse.setCustomerBalances(accountBalances);
             return customerBalanceResponse;
         }else {
             customerBalanceResponse.setErrorMessage("Fatal Error Occurred: "+customerBalanceResponse.getErrorMessage());
